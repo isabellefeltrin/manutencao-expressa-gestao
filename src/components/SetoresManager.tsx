@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Building, Plus, Search, Users, Wrench } from "lucide-react";
+import { Building, Plus, Search, Users, Wrench, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 
 const SetoresManager = () => {
@@ -13,30 +13,32 @@ const SetoresManager = () => {
     {
       id: 1,
       nome: "Produção",
-      tecnicos: 8,
-      maquinas: 15,
-      gerente: "Carlos Oliveira"
+      maquinas: 3,
+      gerente: "João Silva"
     },
     {
       id: 2,
       nome: "Manutenção",
-      tecnicos: 5,
-      maquinas: 0,
-      gerente: "Ana Pereira"
+      maquinas: 2,
+      gerente: "Maria Oliveira"
     },
     {
       id: 3,
-      nome: "Usinagem",
-      tecnicos: 6,
-      maquinas: 8,
-      gerente: "Roberto Silva"
+      nome: "Qualidade",
+      maquinas: 0,
+      gerente: "Carlos Souza"
     },
     {
       id: 4,
-      nome: "Soldagem",
-      tecnicos: 4,
-      maquinas: 3,
-      gerente: "Fernanda Costa"
+      nome: "Logística",
+      maquinas: 0,
+      gerente: "Ana Costa"
+    },
+    {
+      id: 5,
+      nome: "Administrativo",
+      maquinas: 0,
+      gerente: "Pedro Santos"
     }
   ]);
 
@@ -61,7 +63,6 @@ const SetoresManager = () => {
     setSetores([...setores, {
       ...novoSetor,
       id,
-      tecnicos: 0,
       maquinas: 0
     }]);
     setNovoSetor({
@@ -149,10 +150,10 @@ const SetoresManager = () => {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">Técnicos:</span>
+                        <UserCheck className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Gerente:</span>
                       </div>
-                      <span className="font-medium">{setor.tecnicos}</span>
+                      <span className="font-medium">{setor.gerente || "N/A"}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">

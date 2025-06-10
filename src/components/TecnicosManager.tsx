@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, Plus, Search, Phone, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,52 +13,61 @@ const TecnicosManager = () => {
   const [tecnicos, setTecnicos] = useState([
     {
       id: 1,
-      nome: "João Silva",
-      setor: "Produção",
-      dataNasc: "1985-03-15",
-      valorHora: 45.00,
-      cpf: "123.456.789-00",
-      telefone: "(11) 99999-0001"
+      nome: "Fernando Lima",
+      dataNasc: "1990-02-20",
+      valorHora: 35.50,
+      cpf: "111.222.333-44",
+      telefone: "(11) 9444-3333"
     },
     {
       id: 2,
-      nome: "Maria Santos",
-      setor: "Manutenção",
-      dataNasc: "1990-07-22",
-      valorHora: 50.00,
-      cpf: "987.654.321-00",
-      telefone: "(11) 99999-0002"
+      nome: "Patricia Rocha",
+      dataNasc: "1988-06-15",
+      valorHora: 38.75,
+      cpf: "222.333.444-55",
+      telefone: "(11) 9333-2222"
     },
     {
       id: 3,
-      nome: "Pedro Costa",
-      setor: "Produção",
-      dataNasc: "1988-11-10",
-      valorHora: 42.00,
-      cpf: "456.789.123-00",
-      telefone: "(11) 99999-0003"
+      nome: "Ricardo Alves",
+      dataNasc: "1992-09-30",
+      valorHora: 32.00,
+      cpf: "333.444.555-66",
+      telefone: "(11) 9222-1111"
+    },
+    {
+      id: 4,
+      nome: "Juliana Martins",
+      dataNasc: "1987-04-25",
+      valorHora: 40.00,
+      cpf: "444.555.666-77",
+      telefone: "(11) 9111-0000"
+    },
+    {
+      id: 5,
+      nome: "Marcos Nunes",
+      dataNasc: "1991-12-05",
+      valorHora: 36.25,
+      cpf: "555.666.777-88",
+      telefone: "(11) 9000-9999"
     }
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [novoTecnico, setNovoTecnico] = useState({
     nome: "",
-    setor: "",
     dataNasc: "",
     valorHora: "",
     cpf: "",
     telefone: ""
   });
 
-  const setores = ["Produção", "Manutenção", "Qualidade", "Logística"];
-
   const filteredTecnicos = tecnicos.filter(tecnico =>
-    tecnico.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tecnico.setor.toLowerCase().includes(searchTerm.toLowerCase())
+    tecnico.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleNovoTecnico = () => {
-    if (!novoTecnico.nome || !novoTecnico.setor || !novoTecnico.valorHora) {
+    if (!novoTecnico.nome || !novoTecnico.valorHora) {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
@@ -72,7 +80,6 @@ const TecnicosManager = () => {
     }]);
     setNovoTecnico({
       nome: "",
-      setor: "",
       dataNasc: "",
       valorHora: "",
       cpf: "",
@@ -99,8 +106,8 @@ const TecnicosManager = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Gestão de Técnicos</CardTitle>
-              <CardDescription>Cadastro e controle de técnicos de manutenção</CardDescription>
+              <CardTitle>Gestão de Técnicos Externos</CardTitle>
+              <CardDescription>Cadastro e controle de técnicos terceirizados</CardDescription>
             </div>
             <Dialog>
               <DialogTrigger asChild>
@@ -111,7 +118,7 @@ const TecnicosManager = () => {
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>Cadastrar Técnico</DialogTitle>
+                  <DialogTitle>Cadastrar Técnico Externo</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -123,22 +130,6 @@ const TecnicosManager = () => {
                       onChange={(e) => setNovoTecnico({...novoTecnico, nome: e.target.value})}
                       placeholder="Nome completo"
                     />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="setor" className="text-right">Setor *</Label>
-                    <Select
-                      value={novoTecnico.setor}
-                      onValueChange={(value) => setNovoTecnico({...novoTecnico, setor: value})}
-                    >
-                      <SelectTrigger className="col-span-3">
-                        <SelectValue placeholder="Selecione o setor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {setores.map(setor => (
-                          <SelectItem key={setor} value={setor}>{setor}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="dataNasc" className="text-right">Nascimento</Label>
@@ -209,10 +200,10 @@ const TecnicosManager = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <Users className="h-5 w-5 text-muted-foreground" />
-                    <Badge variant="outline">{tecnico.setor}</Badge>
+                    <Badge variant="outline">Terceirizado</Badge>
                   </div>
                   <CardTitle className="text-lg">{tecnico.nome}</CardTitle>
-                  <CardDescription>Técnico de Manutenção</CardDescription>
+                  <CardDescription>Técnico Externo</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">

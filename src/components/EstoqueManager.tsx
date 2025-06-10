@@ -7,34 +7,50 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Package, Plus, Search, AlertTriangle } from "lucide-react";
+import { Package, Plus, Search, AlertTriangle, TrendingDown, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 const EstoqueManager = () => {
   const [materiais, setMateriais] = useState([
     {
       id: 1,
-      nome: "Óleo Hidráulico ISO 46",
-      descricao: "Óleo hidráulico para sistemas de alta pressão",
-      valor: 85.50,
-      estoque: 5,
-      limite: 10
+      nome: "Parafuso sextavado 10mm",
+      descricao: "Parafuso de aço inox sextavado 10mm",
+      valor: 0.50,
+      estoque: 500,
+      estoqueMinimo: 1000
     },
     {
       id: 2,
-      nome: "Correia Dentada 8M",
-      descricao: "Correia dentada para transmissão de movimento",
-      valor: 120.00,
-      estoque: 15,
-      limite: 5
+      nome: "Rolamento 6205",
+      descricao: "Rolamento de esfera 6205",
+      valor: 25.90,
+      estoque: 20,
+      estoqueMinimo: 50
     },
     {
       id: 3,
-      nome: "Rolamento 6204",
-      descricao: "Rolamento de esferas para eixos de 20mm",
-      valor: 35.75,
-      estoque: 3,
-      limite: 8
+      nome: "Óleo lubrificante",
+      descricao: "Óleo lubrificante industrial 20W-50",
+      valor: 45.75,
+      estoque: 30,
+      estoqueMinimo: 100
+    },
+    {
+      id: 4,
+      nome: "Filtro de ar",
+      descricao: "Filtro de ar para máquinas industriais",
+      valor: 32.20,
+      estoque: 15,
+      estoqueMinimo: 30
+    },
+    {
+      id: 5,
+      nome: "Correia dentada",
+      descricao: "Correia dentada tipo B 850mm",
+      valor: 68.30,
+      estoque: 8,
+      estoqueMinimo: 20
     }
   ]);
 
@@ -44,7 +60,7 @@ const EstoqueManager = () => {
     descricao: "",
     valor: "",
     estoque: "",
-    limite: ""
+    estoqueMinimo: ""
   });
 
   const filteredMateriais = materiais.filter(material =>
@@ -53,7 +69,7 @@ const EstoqueManager = () => {
   );
 
   const handleNovoMaterial = () => {
-    if (!novoMaterial.nome || !novoMaterial.valor || !novoMaterial.estoque) {
+    if (!novoMaterial.nome || !novoMaterial.valor) {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
@@ -63,30 +79,24 @@ const EstoqueManager = () => {
       ...novoMaterial,
       id,
       valor: parseFloat(novoMaterial.valor),
-      estoque: parseInt(novoMaterial.estoque),
-      limite: parseInt(novoMaterial.limite || "0")
+      estoque: parseInt(novoMaterial.estoque) || 0,
+      estoqueMinimo: parseInt(novoMaterial.estoqueMinimo) || 0
     }]);
     setNovoMaterial({
       nome: "",
       descricao: "",
       valor: "",
       estoque: "",
-      limite: ""
+      estoqueMinimo: ""
     });
-    toast.success("Material adicionado com sucesso!");
+    toast.success("Material cadastrado com sucesso!");
   };
 
-  const getStatusEstoque = (estoque: number, limite: number) => {
-    if (estoque <= limite) {
-      return <Badge variant="destructive" className="flex items-center gap-1">
-        <AlertTriangle className="h-3 w-3" />
-        Baixo
-      </Badge>;
-    } else if (estoque <= limite * 1.5) {
-      return <Badge variant="secondary">Médio</Badge>;
-    } else {
-      return <Badge variant="default" className="bg-green-500">Normal</Badge>;
-    }
+  const getStatusEstoque = (estoque: number, estoqueMinimo: number) => {
+    const percentual = (estoque / estoqueMinimo) * 100;
+    if (percentual <= 50) return { status: "crítico", color: "destructive", icon: AlertTriangle };
+    if (percentual <= 80) return { status: "baixo", color: "secondary", icon: TrendingDown };
+    return { status: "normal", color: "default", icon: TrendingUp };
   };
 
   return (
@@ -96,7 +106,7 @@ const EstoqueManager = () => {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Gestão de Estoque</CardTitle>
-              <CardDescription>Controle de materiais e peças de reposição</CardDescription>
+              <CardDescription>Controle de materiais e componentes</CardDescription>
             </div>
             <Dialog>
               <DialogTrigger asChild>
@@ -107,7 +117,7 @@ const EstoqueManager = () => {
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>Adicionar Material</DialogTitle>
+                  <DialogTitle>Cadastrar Material</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -143,30 +153,30 @@ const EstoqueManager = () => {
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="estoque" className="text-right">Estoque *</Label>
+                    <Label htmlFor="estoque" className="text-right">Estoque</Label>
                     <Input
                       id="estoque"
                       type="number"
                       className="col-span-3"
                       value={novoMaterial.estoque}
                       onChange={(e) => setNovoMaterial({...novoMaterial, estoque: e.target.value})}
-                      placeholder="Quantidade em estoque"
+                      placeholder="0"
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="limite" className="text-right">Limite Mín.</Label>
+                    <Label htmlFor="estoqueMinimo" className="text-right">Estoque Mín.</Label>
                     <Input
-                      id="limite"
+                      id="estoqueMinimo"
                       type="number"
                       className="col-span-3"
-                      value={novoMaterial.limite}
-                      onChange={(e) => setNovoMaterial({...novoMaterial, limite: e.target.value})}
-                      placeholder="Limite mínimo"
+                      value={novoMaterial.estoqueMinimo}
+                      onChange={(e) => setNovoMaterial({...novoMaterial, estoqueMinimo: e.target.value})}
+                      placeholder="0"
                     />
                   </div>
                 </div>
                 <Button onClick={handleNovoMaterial} className="w-full">
-                  Adicionar Material
+                  Cadastrar Material
                 </Button>
               </DialogContent>
             </Dialog>
@@ -186,38 +196,46 @@ const EstoqueManager = () => {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredMateriais.map((material) => (
-              <Card key={material.id}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <Package className="h-5 w-5 text-muted-foreground" />
-                    {getStatusEstoque(material.estoque, material.limite)}
-                  </div>
-                  <CardTitle className="text-lg">{material.nome}</CardTitle>
-                  <CardDescription className="text-sm">{material.descricao}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Valor Unitário:</span>
-                      <span className="font-medium">R$ {material.valor.toFixed(2)}</span>
+            {filteredMateriais.map((material) => {
+              const statusInfo = getStatusEstoque(material.estoque, material.estoqueMinimo);
+              const StatusIcon = statusInfo.icon;
+              
+              return (
+                <Card key={material.id}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <Package className="h-5 w-5 text-muted-foreground" />
+                      <Badge variant={statusInfo.color as any}>
+                        <StatusIcon className="mr-1 h-3 w-3" />
+                        {statusInfo.status}
+                      </Badge>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Em Estoque:</span>
-                      <span className="font-medium">{material.estoque} unidades</span>
+                    <CardTitle className="text-lg">{material.nome}</CardTitle>
+                    <CardDescription className="line-clamp-2">{material.descricao}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Valor unitário:</span>
+                        <span className="font-medium">R$ {material.valor.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Estoque atual:</span>
+                        <span className="font-medium">{material.estoque}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Estoque mínimo:</span>
+                        <span className="font-medium">{material.estoqueMinimo}</span>
+                      </div>
+                      <div className="flex justify-between pt-2 border-t">
+                        <span className="text-sm text-muted-foreground">Valor total:</span>
+                        <span className="font-bold">R$ {(material.valor * material.estoque).toFixed(2)}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Limite Mínimo:</span>
-                      <span className="font-medium">{material.limite} unidades</span>
-                    </div>
-                    <div className="flex justify-between font-medium text-sm">
-                      <span>Valor Total:</span>
-                      <span>R$ {(material.valor * material.estoque).toFixed(2)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
