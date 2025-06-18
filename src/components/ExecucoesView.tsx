@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Calendar, Clock, User, Wrench, DollarSign, Package, Tool } from "lucide-react";
+import { Search, Calendar, Clock, User, Wrench, DollarSign, Package } from "lucide-react";
 
 const ExecucoesView = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -245,7 +244,7 @@ const ExecucoesView = () => {
                       <div className="space-y-1">
                         {execucao.ferramentas.map((ferramenta, index) => (
                           <div key={index} className="flex items-center gap-1 text-sm">
-                            <Tool className="h-3 w-3 text-muted-foreground" />
+                            <Wrench className="h-3 w-3 text-muted-foreground" />
                             <span>{ferramenta.nome} ({ferramenta.quantidade}x)</span>
                           </div>
                         ))}
