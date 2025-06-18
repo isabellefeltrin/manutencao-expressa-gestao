@@ -1,5 +1,5 @@
 
-import ExecucoesView from "@/components/ExecucoesView";
+import TecnicosManager from "@/components/TecnicosManager";
 
 const Index = () => {
   return (
@@ -7,13 +7,13 @@ const Index = () => {
       <header className="border-b bg-white">
         <div className="flex h-16 items-center px-6">
           <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold">Sistema de Manutenção - Execuções do Mês</h1>
+            <h1 className="text-xl font-bold">Sistema de Manutenção - Gestão de Técnicos</h1>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto p-6">
-        <ExecucoesView />
+        <TecnicosManager />
       </div>
     </div>
   );
