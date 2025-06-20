@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from "@/components/ui/label";
 import { Users, Plus, Search, Phone, Calendar, Edit, Trash2, DollarSign } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Tecnico {
   id_tecnico: number;
@@ -26,62 +27,9 @@ interface Setor {
 }
 
 const TecnicosManager = () => {
-  const [tecnicos, setTecnicos] = useState<Tecnico[]>([
-    {
-      id_tecnico: 1,
-      nome_tecnico: "Fernando Lima",
-      cod_setor: 2,
-      datanasc: "1990-02-20",
-      valorhora: 35.50,
-      cpf: "111.222.333-44",
-      telefone: "(11) 9444-3333"
-    },
-    {
-      id_tecnico: 2,
-      nome_tecnico: "Patricia Rocha",
-      cod_setor: 2,
-      datanasc: "1988-06-15",
-      valorhora: 38.75,
-      cpf: "222.333.444-55",
-      telefone: "(11) 9333-2222"
-    },
-    {
-      id_tecnico: 3,
-      nome_tecnico: "Ricardo Alves",
-      cod_setor: 2,
-      datanasc: "1992-09-30",
-      valorhora: 32.00,
-      cpf: "333.444.555-66",
-      telefone: "(11) 9222-1111"
-    },
-    {
-      id_tecnico: 4,
-      nome_tecnico: "Juliana Martins",
-      cod_setor: 1,
-      datanasc: "1987-04-25",
-      valorhora: 40.00,
-      cpf: "444.555.666-77",
-      telefone: "(11) 9111-0000"
-    },
-    {
-      id_tecnico: 5,
-      nome_tecnico: "Marcos Nunes",
-      cod_setor: 3,
-      datanasc: "1991-12-05",
-      valorhora: 36.25,
-      cpf: "555.666.777-88",
-      telefone: "(11) 9000-9999"
-    }
-  ]);
-
-  const [setores] = useState<Setor[]>([
-    { id_setor: 1, nome_setor: "Produção" },
-    { id_setor: 2, nome_setor: "Manutenção" },
-    { id_setor: 3, nome_setor: "Qualidade" },
-    { id_setor: 4, nome_setor: "Logística" },
-    { id_setor: 5, nome_setor: "Administrativo" }
-  ]);
-
+  const [tecnicos, setTecnicos] = useState<Tecnico[]>([]);
+  const [setores, setSetores] = useState<Setor[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingTecnico, setEditingTecnico] = useState<Tecnico | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -94,10 +42,47 @@ const TecnicosManager = () => {
     telefone: ""
   });
 
+  useEffect(() => {
+    fetchTecnicos();
+    fetchSetores();
+  }, []);
+
+  const fetchTecnicos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tecnico')
+        .select('*')
+        .order('id_tecnico');
+
+      if (error) throw error;
+      setTecnicos(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar técnicos:', error);
+      toast.error('Erro ao carregar técnicos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSetores = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('setor')
+        .select('*')
+        .order('id_setor');
+
+      if (error) throw error;
+      setSetores(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar setores:', error);
+      toast.error('Erro ao carregar setores');
+    }
+  };
+
   const filteredTecnicos = tecnicos.filter(tecnico =>
-    tecnico.nome_tecnico.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tecnico.cpf.includes(searchTerm) ||
-    tecnico.telefone.includes(searchTerm)
+    tecnico.nome_tecnico?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    tecnico.cpf?.includes(searchTerm) ||
+    tecnico.telefone?.includes(searchTerm)
   );
 
   const resetForm = () => {
@@ -116,12 +101,12 @@ const TecnicosManager = () => {
     if (tecnico) {
       setEditingTecnico(tecnico);
       setFormData({
-        nome_tecnico: tecnico.nome_tecnico,
+        nome_tecnico: tecnico.nome_tecnico || "",
         cod_setor: tecnico.cod_setor?.toString() || "",
-        datanasc: tecnico.datanasc,
-        valorhora: tecnico.valorhora.toString(),
-        cpf: tecnico.cpf,
-        telefone: tecnico.telefone
+        datanasc: tecnico.datanasc || "",
+        valorhora: tecnico.valorhora?.toString() || "",
+        cpf: tecnico.cpf || "",
+        telefone: tecnico.telefone || ""
       });
     } else {
       resetForm();
@@ -129,39 +114,62 @@ const TecnicosManager = () => {
     setIsDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.nome_tecnico || !formData.valorhora) {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
 
-    const tecnicoData: Tecnico = {
-      id_tecnico: editingTecnico?.id_tecnico || Math.max(...tecnicos.map(t => t.id_tecnico), 0) + 1,
+    const tecnicoData = {
       nome_tecnico: formData.nome_tecnico,
       cod_setor: formData.cod_setor ? parseInt(formData.cod_setor) : null,
-      datanasc: formData.datanasc,
+      datanasc: formData.datanasc || null,
       valorhora: parseFloat(formData.valorhora),
-      cpf: formData.cpf,
-      telefone: formData.telefone
+      cpf: formData.cpf || null,
+      telefone: formData.telefone || null
     };
 
-    if (editingTecnico) {
-      setTecnicos(prev => prev.map(t => 
-        t.id_tecnico === editingTecnico.id_tecnico ? tecnicoData : t
-      ));
-      toast.success("Técnico atualizado com sucesso!");
-    } else {
-      setTecnicos(prev => [...prev, tecnicoData]);
-      toast.success("Técnico cadastrado com sucesso!");
-    }
+    try {
+      if (editingTecnico) {
+        const { error } = await supabase
+          .from('tecnico')
+          .update(tecnicoData)
+          .eq('id_tecnico', editingTecnico.id_tecnico);
 
-    setIsDialogOpen(false);
-    resetForm();
+        if (error) throw error;
+        toast.success("Técnico atualizado com sucesso!");
+      } else {
+        const { error } = await supabase
+          .from('tecnico')
+          .insert([tecnicoData]);
+
+        if (error) throw error;
+        toast.success("Técnico cadastrado com sucesso!");
+      }
+
+      setIsDialogOpen(false);
+      resetForm();
+      fetchTecnicos();
+    } catch (error) {
+      console.error('Erro ao salvar técnico:', error);
+      toast.error('Erro ao salvar técnico');
+    }
   };
 
-  const handleDelete = (id: number) => {
-    setTecnicos(prev => prev.filter(t => t.id_tecnico !== id));
-    toast.success("Técnico removido com sucesso!");
+  const handleDelete = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('tecnico')
+        .delete()
+        .eq('id_tecnico', id);
+
+      if (error) throw error;
+      toast.success("Técnico removido com sucesso!");
+      fetchTecnicos();
+    } catch (error) {
+      console.error('Erro ao deletar técnico:', error);
+      toast.error('Erro ao remover técnico');
+    }
   };
 
   const getSetorNome = (codSetor: number | null) => {
@@ -182,6 +190,17 @@ const TecnicosManager = () => {
     }
     return idade;
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Carregando técnicos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -357,7 +376,7 @@ const TecnicosManager = () => {
                         <DollarSign className="h-4 w-4 text-green-600" />
                         <span className="text-sm text-muted-foreground">Valor/Hora:</span>
                       </div>
-                      <span className="font-medium">R$ {tecnico.valorhora.toFixed(2)}</span>
+                      <span className="font-medium">R$ {tecnico.valorhora?.toFixed(2) || '0.00'}</span>
                     </div>
                     {tecnico.cpf && (
                       <div className="flex justify-between">
@@ -371,7 +390,7 @@ const TecnicosManager = () => {
             ))}
           </div>
 
-          {filteredTecnicos.length === 0 && (
+          {filteredTecnicos.length === 0 && !loading && (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Nenhum técnico encontrado com os critérios de busca.</p>
