@@ -166,10 +166,13 @@ const TecnicosManager = () => {
       if (error) throw error;
       toast.success("Técnico removido com sucesso!");
       fetchTecnicos();
-    } catch (error) {
-      console.error('Erro ao deletar técnico:', error);
-      toast.error('Erro ao remover técnico');
-    }
+    } catch (error: any) {
+  if (error.message.includes('violates foreign key constraint')) {
+    toast.error('Este técnico está vinculado a execuções e não pode ser removido.');
+  } else {
+    toast.error('Erro ao remover técnico: ' + error.message);
+  }
+}
   };
 
   const getSetorNome = (codSetor: number | null) => {
@@ -208,8 +211,7 @@ const TecnicosManager = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Gestão de Técnicos</CardTitle>
-              <CardDescription>Cadastro, edição e remoção de técnicos</CardDescription>
+
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
@@ -304,13 +306,6 @@ const TecnicosManager = () => {
         <CardContent>
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Buscar técnicos por nome, CPF ou telefone..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
             </div>
           </div>
 
